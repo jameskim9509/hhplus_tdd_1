@@ -68,7 +68,7 @@ public class PontServiceIntegrationTest {
     /**
      * 동시 사용 시 충돌 해결
      */
-    @DisplayName("동시 충전시 충돌 해결")
+    @DisplayName("동시 사용시 충돌 해결")
     @Test
     void 동시_사용시_충돌_해결() throws InterruptedException {
         // given
