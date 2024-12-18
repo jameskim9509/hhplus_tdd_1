@@ -12,13 +12,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-class PointServiceTest {
+class PointServiceUnitTest {
 
     @Mock
     UserPointTable userPointTable;
 
     @Mock
     PointHistoryTable pointHistoryTable;
+
+    @Mock
+    LockManager lockManager;
 
     @InjectMocks
     PointService pointService;

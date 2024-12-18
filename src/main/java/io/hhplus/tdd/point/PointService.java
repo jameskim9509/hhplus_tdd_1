@@ -13,13 +13,14 @@ public class PointService {
     public static final Long MAX_POINT = 100_000L;
     private final UserPointTable userPointTable;
     private final PointHistoryTable pointHistoryTable;
+    private final LockManager lockManager;
 
     public UserPoint getPoint(Long userId)
     {
         return userPointTable.selectById(userId);
     }
 
-    public synchronized UserPoint chargePoint(Long userId, Long pointAmount) throws RuntimeException
+    public UserPoint chargePoint(Long userId, Long pointAmount) throws RuntimeException
     {
         UserPoint beforePoint = userPointTable.selectById(userId);
         if (MAX_POINT < beforePoint.point() + pointAmount)
@@ -33,7 +34,7 @@ public class PointService {
         return afterPoint;
     }
 
-    public synchronized UserPoint usePoint(Long userId, Long pointAmount) throws RuntimeException
+    public UserPoint usePoint(Long userId, Long pointAmount) throws RuntimeException
     {
         UserPoint beforePoint = userPointTable.selectById(userId);
         if (0 > beforePoint.point() - pointAmount)
