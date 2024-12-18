@@ -22,29 +22,41 @@ public class PointService {
 
     public UserPoint chargePoint(Long userId, Long pointAmount) throws RuntimeException
     {
-        UserPoint beforePoint = userPointTable.selectById(userId);
-        if (MAX_POINT < beforePoint.point() + pointAmount)
-            throw new RuntimeException("최대 잔고 초과");
+        lockManager.lock(userId);
+        try {
+            UserPoint beforePoint = userPointTable.selectById(userId);
+            if (MAX_POINT < beforePoint.point() + pointAmount)
+                throw new RuntimeException("최대 잔고 초과");
 
-        UserPoint afterPoint =
-                userPointTable.insertOrUpdate(userId, beforePoint.point() + pointAmount);
+            UserPoint afterPoint =
+                    userPointTable.insertOrUpdate(userId, beforePoint.point() + pointAmount);
 
-        pointHistoryTable.insert(userId, pointAmount, TransactionType.CHARGE, afterPoint.updateMillis());
+            pointHistoryTable.insert(userId, pointAmount, TransactionType.CHARGE, afterPoint.updateMillis());
 
-        return afterPoint;
+            return afterPoint;
+        }
+        finally {
+            lockManager.unlock(userId);
+        }
     }
 
     public UserPoint usePoint(Long userId, Long pointAmount) throws RuntimeException
     {
-        UserPoint beforePoint = userPointTable.selectById(userId);
-        if (0 > beforePoint.point() - pointAmount)
-            throw new RuntimeException("포인트 잔고 부족");
+        lockManager.lock(userId);
+        try{
+            UserPoint beforePoint = userPointTable.selectById(userId);
+            if (0 > beforePoint.point() - pointAmount)
+                throw new RuntimeException("포인트 잔고 부족");
 
-        UserPoint afterPoint = userPointTable.insertOrUpdate(userId, beforePoint.point() - pointAmount);
+            UserPoint afterPoint = userPointTable.insertOrUpdate(userId, beforePoint.point() - pointAmount);
 
-        pointHistoryTable.insert(userId, pointAmount, TransactionType.USE, afterPoint.updateMillis());
+            pointHistoryTable.insert(userId, pointAmount, TransactionType.USE, afterPoint.updateMillis());
 
-        return afterPoint;
+            return afterPoint;
+        }
+        finally {
+            lockManager.unlock(userId);
+        }
     }
 
     public List<PointHistory> getPointHistory(Long userId)
