@@ -1,4 +1,4 @@
 package io.hhplus.tdd.dto;
 
-public class ChargeRequestDto {
+public record ChargeRequestDto (Long amount) {
 }
