@@ -22,6 +22,9 @@ public class PointService {
     public synchronized UserPoint chargePoint(Long userId, Long pointAmount) throws RuntimeException
     {
         UserPoint beforePoint = userPointTable.selectById(userId);
+        if (MAX_POINT < beforePoint.point() + pointAmount)
+            throw new RuntimeException("최대 잔고 초과");
+
         UserPoint afterPoint =
                 userPointTable.insertOrUpdate(userId, beforePoint.point() + pointAmount);
 
@@ -33,6 +36,9 @@ public class PointService {
     public synchronized UserPoint usePoint(Long userId, Long pointAmount) throws RuntimeException
     {
         UserPoint beforePoint = userPointTable.selectById(userId);
+        if (0 > beforePoint.point() - pointAmount)
+            throw new RuntimeException("포인트 잔고 부족");
+
         UserPoint afterPoint = userPointTable.insertOrUpdate(userId, beforePoint.point() - pointAmount);
 
         pointHistoryTable.insert(userId, pointAmount, TransactionType.USE, afterPoint.updateMillis());
